@@ -424,15 +424,16 @@ Provide context, not commands.
 **What Works:**
 1. **Information gathering automation is viable**: 88.7% time reduction validated
 2. **Domain-specific prompts are critical**: Generic prompts fail, RTL-specific succeed
-3. **RAG enables pattern matching**: 86-pattern database with 95% similarity
+3. **RAG enables pattern matching**: 86-pattern database with similarity-based retrieval
 4. **Engineers value context**: Structured information enables fast decisions
-5. **Human-in-the-loop is essential**: Automation supports, doesn't replace
 
 **What's Challenging:**
-1. **Database freshness**: Patterns become outdated with tool updates
-2. **Boundary cases**: Some errors span multiple categories
-3. **Completeness vs. noise**: Trade-off between comprehensive and concise
-4. **Prompt engineering effort**: Significant effort to create domain-specific prompts
+1. **Manual solution curation**: 86 patterns require expert knowledge to define and write correctly
+2. **Solution quality variance**: System output quality depends on manually-written SOP quality
+3. **Database freshness**: Patterns become outdated with tool updates
+4. **Boundary cases**: Some errors span multiple categories
+5. **Completeness vs. noise**: Trade-off between comprehensive and concise
+6. **Prompt engineering effort**: Significant effort to create domain-specific prompts
 
 ### B. Comparison with Related Work
 
@@ -462,17 +463,21 @@ Provide context, not commands.
 ### D. Limitations and Future Work
 
 **Current Limitations:**
-1. 1-2 case validation (needs large-scale)
-2. 12 categories cover 75% (25% remain)
-3. Static patterns (need dynamic adaptation)
-4. No automatic parameter optimization
+1. **Small validation scale**: 1-2 case validation (needs large-scale deployment)
+2. **Partial coverage**: 12 categories cover ~75% of common domain (25% remain)
+3. **Manual solution curation**: 86 error-solution patterns require manual definition and maintenance by domain experts
+4. **Solution quality dependency**: System effectiveness depends on quality of manually-written solution SOPs
+5. **No human-in-the-loop yet**: Current system provides information only; automated action execution with human approval is future work
+6. **Static pattern database**: Patterns need manual updates, no dynamic learning from new cases
 
 **Future Work:**
 1. **3-month pilot deployment** with full common domain (4,963 cases)
-2. **Expand to all 30,132 tests** (beyond common domain)
-3. **Adaptive prompt optimization** (learn from feedback)
-4. **Automatic parameter tuning** for SPECERR-* cases
-5. **Predictive error prevention** (proactive, not reactive)
+2. **Human-in-the-loop implementation**: Automated execution with engineer approval workflow
+3. **Expand to all 30,132 tests** (beyond common domain)
+4. **Solution quality improvement**: Automated solution extraction from successful resolutions
+5. **Dynamic pattern learning**: Learn new patterns from engineer feedback
+6. **Adaptive prompt optimization** (learn from feedback)
+7. **Predictive error prevention** (proactive, not reactive)
 
 ---
 

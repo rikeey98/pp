@@ -795,3 +795,29 @@ Note: Based on 88.7% average time reduction from case studies.
 - 모듈명 → "Module A", "IP Core X"
 - 구체적 옵션명 → 추상화 (예: "SIMULATION_TIMEOUT")
 - 파일 경로 → 일반화 (/project/config/...)
+
+### ⚠️ 중요 한계점 (논문에 명시 필요):
+
+**1. 수동 솔루션 큐레이션:**
+- 86개 error-solution 패턴은 사람이 직접 작성 필요
+- 도메인 전문가가 SOP를 정확하게 작성해야 함
+- 솔루션의 품질이 시스템 성능에 직접적 영향
+- **현재**: 수작업으로 패턴 관리
+- **미래 과제**: 성공적인 해결 사례에서 자동 솔루션 추출
+
+**2. Human-in-the-loop 미구현:**
+- **현재 시스템**: 정보 수집만 자동화, 추천만 제공
+- **미구현**: 자동 실행 + 엔지니어 승인 워크플로우
+- **이유**: 안전성 우선, RTL 지식 필요
+- **미래 과제**: Auto Executor에 human approval 메커니즘 추가
+
+**3. 정적 패턴 데이터베이스:**
+- 새로운 에러 패턴 발견 시 수동으로 추가 필요
+- 엔지니어 피드백으로부터 자동 학습 안됨
+- **미래 과제**: Dynamic pattern learning from feedback
+
+**논문에서 표현 방법:**
+- Section V: "Current system focuses on information gathering automation"
+- Section VI.D Limitations: 명시적으로 위 3가지 한계 언급
+- Section VI.D Future Work: Human-in-the-loop, automated solution extraction, dynamic learning
+- 학술적 정직성: "This preliminary work validates information gathering; full automation with human approval is planned future work"
