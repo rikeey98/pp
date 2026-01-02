@@ -18,15 +18,27 @@
 ## 실제 구현 현황
 
 ### ✅ 구축 완료
-- LangChain/LangGraph 기반 멀티 에이전트 시스템 껍데기
-- 5개 sub-agents 구조: Error Analysis, Data Collector, Decision Maker, Auto Executor, Notification
+- LangChain/LangGraph 기반 멀티 에이전트 시스템 (GitHub: rikeey98/multi-agent)
+- **5개 sub-agents 구조** (최종 확정):
+  1. **Error Analyzer** (SOP Searcher 통합 ⭐)
+  2. Data Collector
+  3. Decision Maker
+  4. Auto Executor
+  5. Notification
 - MCP: MongoDB (에러-솔루션 패턴), OracleDB (검증팀 데이터)
 - RAG 시스템 (Qwen3 embeddings)
 - 86개 검증된 오류-솔루션 쌍 데이터베이스
+- System Prompt를 MD 파일로 관리하는 구조
 
 ### ❌ 미완성
-- **System Prompt 문서** (핵심!) - 각 agent별 prompt 작성 필요
-- 실제 측정 데이터 (시간 단축, 정확도 등)
+- **System Prompt 내용** (핵심!) - 12개 카테고리 반영 필요
+- **실제 측정 데이터** (시간 단축, 정확도 등)
+- Mock case 실험
+
+### 📝 참고: GitHub 코드
+- GitHub 코드는 일반적인 템플릿 (TIMEOUT/MEMORY/CONFIG 카테고리)
+- **논문에는 실제 SOC 검증 카테고리 사용** (OPTERR, PATHERR, SPECERR-*)
+- 코드 구조와 prompt 관리 방식은 참고
 
 ---
 
@@ -110,21 +122,29 @@
 
 ```
 ┌─────────────────────────────────────────────┐
-│ 1. Error Analysis Agent                     │
+│ 1. Error Analyzer Agent ⭐                  │
+│    (SOP Searcher 통합)                      │
 ├─────────────────────────────────────────────┤
-│ 역할: 로그 파싱 및 에러 분류                │
+│ 역할: 로그 파싱, 에러 분류, SOP 검색       │
 │                                             │
 │ 작업:                                       │
 │ - 로그에서 [OPTERR][*] 패턴 찾기           │
 │ - "옵션 XYZ가 누락되었습니다" 추출          │
 │ - 에러 타입, 심각도, 발생 시간 분류        │
+│ - 86개 패턴 DB에서 SOP 검색 (RAG)          │
+│ - 매칭된 SOP 절차 추출                     │
 │                                             │
 │ Output:                                     │
 │ ErrorInfo(                                  │
 │   type="OPTERR",                           │
 │   option="XYZ",                            │
 │   severity="high",                         │
-│   timestamp="2025-01-02 14:30:00"         │
+│   timestamp="2025-01-02 14:30:00",        │
+│   sop_steps=[                              │
+│     "1. 옵션 파일 확인",                    │
+│     "2. 유사 케이스 검색",                  │
+│     "3. 올바른 값 확인"                     │
+│   ]                                        │
 │ )                                          │
 └─────────────────────────────────────────────┘
               ↓
@@ -237,35 +257,64 @@
 
 각 Agent의 System Prompt 설계가 논문의 핵심 contribution입니다.
 
-### Error Analysis Agent Prompt (예시)
+### Error Analyzer Agent Prompt (예시) ⭐
+
+**Note**: SOP Searcher 기능 통합됨
 
 ```
-You are an Error Analysis Agent for RTL verification workflows.
+You are an Error Analyzer Agent for RTL verification workflows.
+You combine error analysis and SOP search capabilities.
 
-Your task:
-1. Read log files from verification runs
-2. Identify error patterns from 12 categories:
-   - OPTERR, PATHERR, TYPEERR, SPECERR-*, FILEERR
-3. Extract key information:
-   - Error type
-   - Error message
-   - Affected module/testcase
-   - Timestamp
-   - Severity (critical/high/medium/low)
+TASK 1 - Error Pattern Matching:
+Read log files and identify error patterns from 12 categories:
+
+Environment/Config Errors:
+- OPTERR: Option/value setting errors
+- PATHERR: Path/filename mismatches
+- SPECERR-NOFILE: File/path not found
+
+Design Errors:
+- TYPEERR: Type/name definition errors
+- SPECERR_DSTERR: Multiple destination errors
+- SPECERR-NULLPORT: Port name missing
+- SPECERR-NULLTXT: Port/text content missing
+- SPECERR-PORTWIDTH: Bit-width mismatches
+- SPECERR_TIEERR: TIE value mismatches
+- SPECERR-HIER7: Hierarchical level constraints
+
+Tool/File Errors:
+- SPECERR-DIFFVAL: Spec value mismatches
+- FILEERR: File generation/parsing errors
+
+TASK 2 - SOP Retrieval:
+- Search 86-pattern database using RAG (top-3 matches)
+- Extract SOP steps from matched patterns
+- Include similarity score
 
 Output format:
 {
-  "error_type": "OPTERR|PATHERR|...",
-  "error_message": "extracted message",
-  "affected_module": "module name",
+  "error_type": "OPTERR|PATHERR|TYPEERR|SPECERR-*|FILEERR",
+  "error_code": "pattern code from log",
+  "error_message": "exact message from log",
+  "affected_module": "module name or 'unknown'",
   "timestamp": "YYYY-MM-DD HH:MM:SS",
-  "severity": "critical|high|medium|low"
+  "severity": "critical|high|medium|low",
+  "matched_sop": {
+    "pattern_id": "SOC_ERR_001",
+    "similarity": 0.95,
+    "sop_steps": [
+      "1. Check option file location",
+      "2. Search similar cases in database",
+      "3. Verify correct value format"
+    ]
+  }
 }
 
 Rules:
-- Only analyze, do not suggest solutions
-- Be precise in pattern matching
-- If unsure, mark severity as "unknown"
+- Combine pattern matching + SOP search in single step
+- If no SOP match found (similarity < 0.7), set matched_sop to null
+- DO NOT suggest solutions beyond SOP steps
+- Be precise in error classification
 ```
 
 ### Data Collector Agent Prompt (예시)
@@ -522,3 +571,164 @@ Case 1: OPTERR - Option XYZ missing
 - 카테고리별 분포 (예: OPTERR 23%, PATHERR 18%, SPECERR-* 45%, ...)
 - 일반적 예시만 제시 (라이선스, 디스크 공간, 경로 문제 등)
 - "환경/설정 문제", "설계 문제", "파일/도구 문제" 3개 타입으로 추상화
+
+---
+
+## 3일 실행 계획 (데드라인: Day 3 제출)
+
+### Day 1 - 오늘 (데이터 준비 + 문서화)
+
+**오전 (4시간):**
+- [x] Full_Paper_Planning.md 업데이트 (완료!)
+- [ ] Mock Case 1: OPTERR 시나리오 작성
+  - 짜집기 로그 파일 생성 (/tmp/mock_opterr.log)
+  - 3개 유사 케이스 데이터 준비 (JSON)
+  - Agent 돌려서 출력 캡처
+  - 시간 측정 (manual baseline vs agent)
+- [ ] Mock Case 2: PATHERR 시나리오 작성
+  - 로그 파일, 유사 케이스, 출력
+
+**오후 (4시간):**
+- [ ] System Prompt 5개 작성 (논문용, MD 형식)
+  - Error Analyzer (12 categories 반영)
+  - Data Collector
+  - Decision Maker
+  - Auto Executor
+  - Notification
+- [ ] Mock case 실행 결과 정리
+  - 스크린샷/출력 저장
+  - 시간 측정 데이터 정리
+
+**저녁:**
+- [ ] Related Work 섹션 초안 (12개 논문 요약 활용)
+
+---
+
+### Day 2 - 논문 핵심 섹션 작성
+
+**오전 (5시간):**
+- [ ] **Section III: System Architecture** (2시간)
+  - 5-agent 구조 diagram
+  - 12-category taxonomy table
+  - Workflow description
+
+- [ ] **Section IV: System Prompt Engineering** ⭐⭐⭐ (3시간)
+  - 가장 중요한 섹션!
+  - Prompt design principles
+  - 5개 agent별 prompt 상세 예시
+  - 12-category specific instructions
+
+**오후 (5시간):**
+- [ ] **Section V: Implementation and Design Validation** (3시간)
+  - Prototype implementation status
+  - Mock case study 1: OPTERR (상세)
+  - Mock case study 2: PATHERR (간략)
+  - Expected performance table
+  - Validation limitations (정직하게)
+
+- [ ] **Section VI: Discussion** (2시간)
+  - Design insights
+  - Lessons learned
+  - Limitations
+  - Future work
+
+**저녁:**
+- [ ] Figure/Table 정리
+- [ ] References 정리
+
+---
+
+### Day 3 - 완성 및 제출
+
+**오전 (4시간):**
+- [ ] **Abstract** (1시간)
+  - 150-200 words
+  - 문제, 솔루션, 기여, 결과
+
+- [ ] **Section I: Introduction** (2시간)
+  - 문제 정의
+  - Motivation
+  - Contributions (4개)
+  - Paper structure
+
+- [ ] **Section VII: Conclusion** (1시간)
+  - Summary
+  - Impact
+  - Future work
+
+**오후 (4시간):**
+- [ ] 전체 리뷰 (2시간)
+  - Consistency check
+  - Figure/Table 번호 확인
+  - Reference 형식 통일
+
+- [ ] 최종 수정 (1시간)
+  - Grammar check
+  - Formatting
+  - DVCON template 적용
+
+- [ ] **제출!** (1시간)
+  - PDF 생성
+  - Submission form 작성
+  - 백업
+
+---
+
+## 우선순위 (시간 부족 시)
+
+### Must Have (필수):
+1. ✅ System Prompt Engineering 섹션 (핵심!)
+2. ✅ Mock Case 1개 이상 (OPTERR)
+3. ✅ Architecture + Implementation 섹션
+4. ✅ Abstract + Introduction + Conclusion
+5. ✅ Discussion (한계 인정)
+
+### Nice to Have (시간 있으면):
+1. Mock Case 2개 (OPTERR + PATHERR)
+2. 상세한 실험 결과
+3. 엔지니어 인터뷰
+4. 정교한 Figure/Diagram
+
+### Can Skip (꼭 필요 없음):
+1. 완벽한 실험 데이터 (preliminary로 충분)
+2. 모든 12개 카테고리 예시 (대표 2-3개만)
+3. 복잡한 다이어그램
+
+---
+
+## 예상 페이지 수 (DVCON 기준 6-8 페이지)
+
+| Section | 예상 페이지 |
+|---------|-------------|
+| Abstract | 0.25 |
+| I. Introduction | 1.0 |
+| II. Related Work | 0.75 |
+| III. Architecture | 1.5 |
+| IV. Prompt Engineering ⭐ | 2.0 |
+| V. Implementation & Validation | 1.5 |
+| VI. Discussion | 0.75 |
+| VII. Conclusion | 0.25 |
+| **Total** | **8.0 pages** |
+
+---
+
+## 작성 팁
+
+### Option 2 전략 (Design Goals + Mock Case):
+- ✅ "Design validation" not "experimental results"
+- ✅ "Mock case study" not "controlled experiment"
+- ✅ "Expected performance" not "measured performance"
+- ✅ "Preliminary validation" not "comprehensive evaluation"
+- ✅ 한계를 솔직하게 인정 (Section VI)
+
+### 학술적 정직성:
+- "This paper presents our system **design** and preliminary validation"
+- "We validate our approach through **mock cases**"
+- "**Expected** time savings: ~90%"
+- "Full production deployment is **planned** as future work"
+
+### 강점 강조:
+- 5-agent architecture (novel)
+- Domain-specific prompt engineering (key contribution)
+- 12-category taxonomy for RTL verification
+- Practical, deployable system design
