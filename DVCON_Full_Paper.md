@@ -110,7 +110,7 @@ Steps 1-3 are systematic and automatable. Step 4 requires RTL design knowledge a
 
 ### B. 12-Category Error Taxonomy
 
-We classify verification errors into 12 categories based on analysis of 30,132 regression tests from a flagship SoC project:
+We classify verification errors into 12 categories based on analysis of 30,132 regression tests from a flagship SoC project. Our taxonomy consolidates 86 defined common domain solutions into 12 categories through systematic grouping. This consolidation serves three critical purposes: (1) **Agent prompt engineering efficiency**—creating specialized prompts for 12 categories is tractable while 86 would be unwieldy, (2) **Pattern generalization**—grouping similar error patterns (e.g., various port-related issues into SPECERR-NULLPORT) enables agents to handle pattern variations within categories, and (3) **Maintainability**—category-level abstraction allows prompt updates without restructuring the entire taxonomy when new error patterns emerge. The 12 categories represent the optimal granularity for multi-agent orchestration, balancing specificity for accurate classification with generality for robust automation.
 
 **Environment/Configuration Errors (3 categories - 22% of automatable):**
 - **OPTERR**: Option/value setting errors in configuration files (missing options, type mismatches)
