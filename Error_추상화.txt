@@ -1,0 +1,14 @@
+추상화된 오류. 해결 카테고리
+
+옵션,값 설정 오류 : OPTERR 옵션에 누락이나 오판, 옵션에 올바른 문자열 삽입
+경로, 파일명 불일치 : PATHERR, 파일 경로 버전 차이, 경로 옵션을HDL REVISION에 맞게 수정 보통 perforce 버전을 sync하면된다.
+타입,명칭 정의 오류 : TYPEERR, 문자열, 타입 미정의 : 옵션 추가, Testbench(TB) 수정
+스펙 불일치, 값 차이 : SPECERR-DIFFVAL, 내용 불일치 : dump-link spec 확인 후 차이점 수정
+다중 DST/아키텍처 오류:SPECERR_DSTERR: more than 1 dst are high, RTL 연결 확인 수정 (단일 src->다중 dst문제 )
+파일 생성, 파싱 오류 : FILEERR, 파일 미생성, 파싱 실패 : 파서 검증. 필요시 스펙 excel 위치 포멧 확인
+파일,경로 미존재 :SPECERR-NOFILE : 스펙 excel이 지정 위치에 존재하는지 확인 , 파서 재실행
+포트 명칭 존재 여부 오류 :SPECERR-NULLPORT 포트 부재, RTL 포트명과 일치하도록 spec 수정
+포트.텍스트 내용 부재 :SPECERR-NULLTXT, 연결 spec에 내용이 없으면 삭제, 포멧 재검증
+비트-폭 불일치 : SPECERR-PORTWIDTH : 비트-폭 맞추기;spec 업데이트
+티-값(TIE) 불일치 SPECERR_TIEERR :src value 1, dst value 2 tie value 0 : tie 값을 일치시키고 spec수정
+계층 레벨 제한 SPECERR-HIER7 : hierarchical level of source ... must be >= 7, 포트 계층을 IP레벨이상으로 변경 (필요시)
