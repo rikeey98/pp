@@ -191,13 +191,10 @@ Our system employs five specialized agents orchestrated via LangChain/LangGraph:
 ### D. Technology Stack
 
 **Agent Orchestration**: LangChain/LangGraph for agent workflow management
-**LLM**: Claude Sonnet 3.5 for agent reasoning
+**LLM**: OpenAI-GPT-OSS-120B for agent reasoning
 **RAG**: Qwen3 embeddings for error pattern similarity search
-**Databases**:
-- MongoDB: 86 error-solution patterns, historical case database
-- OracleDB: RTL specification data (port definitions, signal widths)
+**Databases**: SQL(Oracledb), NOSQL(Mongodb)
 **MCP (Model Context Protocol)**: Custom servers for MongoDB access, OracleDB queries, file system operations on verification servers
-**Infrastructure**: Root access to Linux verification servers for log file reading
 
 ### E. Workflow Execution
 
