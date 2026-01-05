@@ -297,28 +297,13 @@ We validated our system with 1-2 representative cases from flagship project hist
 
 ### C. Expected Scalability Analysis
 
-Based on validated time reduction (88.7%), we estimate potential savings when deployed at scale:
+Based on validated time reduction (88.7%), we estimate potential time savings when deployed at scale:
 
-**Table II: Expected Scalability to Full Dataset**
+| Deployment Scenario | Target Cases | Time Saved per Case | Total Time Saved |
+|---------------------|--------------|---------------------|------------------|
+| **Common Domain (75%)** | 4,963 | ~21 min | **1,736 hours/cycle** |
 
-| Deployment Scenario | Target Cases | Time/Case | Total Time Saved |
-|---------------------|--------------|-----------|------------------|
-| **Current Validation** | 1-2 | ~21 min | ~42 min |
-| **Common Domain (75%)** | 4,963 | ~21 min | **1,736 hours** |
-| **Common Domain (100%)** | 6,617 | ~21 min | 2,315 hours |
-| **All Domains (est.)** | ~15,000 | ~21 min | 5,250 hours |
-
-**Conservative Estimate (Common Domain 75%):**
-- 1,736 engineer-hours saved per regression cycle
-- Assuming 4 regression cycles per year: ~6,944 hours/year
-- At average engineer cost $100/hour: ~$694,000 annual savings
-- Enables engineers to focus on complex design issues requiring expertise
-
-**Deployment Assumptions**:
-- 75% success rate (not 100%) to account for edge cases
-- Time reduction maintains at 88.7% (validated range: 87-90%)
-- Similar error distribution across common domain
-- No significant tool or process changes
+Conservative estimates project 1,736 engineer-hours saved per regression cycle when deployed to 4,963 automatable errors in the common verification domain. This enables engineers to focus on complex design issues requiring domain expertise rather than repetitive information gathering.
 
 ### D. Validation Limitations
 
@@ -462,7 +447,7 @@ Based on these findings, we recommend a hybrid deployment strategy: traditional 
 
 ### B. Impact and Contributions
 
-Conservative estimates suggest potential savings of 1,736 engineer-hours per regression cycle when deployed to 4,963 automatable errors in the common verification domain, translating to approximately $694,000 in annual savings. The capability assessment demonstrates that AI agent-based approaches can handle 70-90% of errors across all categories, including previously unautomatable complex design logic errors that constitute 99.2% undefined cases in Category D. More importantly, this frees verification engineers from repetitive information gathering to focus on complex design issues requiring domain expertise.
+Conservative estimates suggest potential savings of 1,736 engineer-hours per regression cycle when deployed to 4,963 automatable errors in the common verification domain. The capability assessment demonstrates that AI agent-based approaches can handle 70-90% of errors across all categories, including previously unautomatable complex design logic errors that constitute 99.2% undefined cases in Category D. More importantly, this frees verification engineers from repetitive information gathering to focus on complex design issues requiring domain expertise.
 
 This work demonstrates that significant automation gains are achievable by focusing on information gathering rather than attempting complete error resolution. By preserving human decision-making while automating systematic data collection, we align with production safety requirements and leverage AI capabilities for practical value.
 
