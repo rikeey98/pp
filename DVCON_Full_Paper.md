@@ -358,37 +358,13 @@ We acknowledge the following limitations in our validation:
 
 **What's Challenging:**
 
-1. **Manual solution curation**: 86 error-solution patterns require expert knowledge to define and write correctly. Solution quality directly impacts system effectiveness—poor SOP documentation produces poor recommendations.
+1. **Manual solution curation**: 86 error-solution patterns require expert knowledge to define and maintain correctly.
 
-2. **Solution quality variance**: System output depends on manually-written SOP quality. Incomplete or outdated SOPs lead to weak matches (similarity <0.7) and agent uncertainty.
+2. **Database freshness**: Error patterns evolve with tool updates; pattern database requires periodic updates.
 
-3. **Database freshness**: Error patterns evolve with tool updates and design methodology changes. Pattern database requires periodic review and updates.
+3. **Prompt engineering effort**: Creating 2,500+ lines of domain-specific prompts required significant expert time (estimated 3-4 person-weeks).
 
-4. **Boundary cases**: Some errors span multiple categories (e.g., PATHERR caused by OPTERR). Current single-category classification may oversimplify.
-
-5. **Completeness vs. noise trade-off**: Collecting more information improves completeness but risks overwhelming engineers with irrelevant details.
-
-6. **Prompt engineering effort**: Creating 2,500+ lines of domain-specific prompts required significant expert time (estimated 3-4 person-weeks).
-
-### B. Comparison with Related Work
-
-**vs. AutoCodeRover [1]:**
-- **They**: Automated code fixes (46% success on SWE-bench)
-- **We**: Information gathering automation (88.7% time reduction)
-- **Trade-off**: They automate more (complete fixes), we prioritize safety (human-in-loop for decisions)
-- **Domain**: They target software bugs, we target RTL verification errors with hardware-specific considerations
-
-**vs. HDLdebugger [5]:**
-- **They**: General HDL debugging with conversational RAG
-- **We**: Verification workflow errors with multi-agent orchestration
-- **Advantage**: Our category-specific prompts (12 types) and production infrastructure integration (MongoDB, OracleDB, file systems)
-
-**vs. LogLLM [3]:**
-- **They**: Log-based anomaly detection via fine-tuning
-- **We**: RAG-based error triage without fine-tuning
-- **Rationale**: RAG allows incremental pattern updates; fine-tuning requires retraining when patterns change
-
-### C. Practical Deployment Considerations
+### B. Practical Deployment Considerations
 
 **Organizational Impact:**
 - 1,736 hours/cycle savings for 4,963 common domain errors
@@ -410,7 +386,7 @@ We acknowledge the following limitations in our validation:
 - Engineer adoption rate ≥70% (engineers using system vs. manual)
 - Pattern database coverage ≥80% of common errors
 
-### D. Limitations and Future Work
+### C. Limitations and Future Work
 
 **Current Limitations:**
 
@@ -418,31 +394,15 @@ We acknowledge the following limitations in our validation:
 
 2. **Partial coverage**: 86 patterns cover ~75% of common domain (25% remain unmatched or require pattern expansion)
 
-3. **Manual solution curation**: 86 error-solution patterns require manual definition and maintenance by domain experts
-
-4. **Solution quality dependency**: System effectiveness depends on quality of manually-written SOPs
-
-5. **No human-in-the-loop yet**: Current system provides information gathering and recommendations only; automated action execution with human approval workflow is future work
-
-6. **Static pattern database**: Patterns require manual updates; no dynamic learning from new cases or engineer feedback
+3. **Static pattern database**: Patterns require manual updates; no dynamic learning from new cases or engineer feedback
 
 **Future Work:**
 
 1. **3-month pilot deployment**: Full deployment to 4,963 common domain cases with comprehensive metrics collection
 
-2. **Human-in-the-loop implementation**: Automated execution with engineer approval workflow, allowing safe auto-execution of low-risk actions under engineer supervision
+2. **Dynamic pattern learning**: Learn new patterns from engineer feedback and successful resolutions, reducing manual curation effort
 
-3. **Expand to all 30,132 tests**: Extend beyond common domain with additional error categories
-
-4. **Solution quality improvement**: Automated solution extraction from successful engineer resolutions to augment pattern database
-
-5. **Dynamic pattern learning**: Learn new patterns from engineer feedback and successful resolutions, reducing manual curation effort
-
-6. **Adaptive prompt optimization**: Automatically tune prompts based on agent success rates and engineer feedback
-
-7. **Predictive error prevention**: Shift from reactive triage to proactive detection of error-prone configurations before regression runs
-
-8. **Cross-project generalization**: Validate approach on multiple SoC projects to establish generalizability
+3. **Cross-project generalization**: Validate approach on multiple SoC projects to establish generalizability
 
 ---
 
