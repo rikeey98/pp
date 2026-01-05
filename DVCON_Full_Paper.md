@@ -33,7 +33,7 @@ Automating RTL verification error triage presents several challenges:
 We present a multi-agent system focused on **information gathering automation** for RTL verification error triage. Our system does not attempt complete error resolution automation—which would require RTL design expertise—but instead automates the systematic collection of information that engineers need to make informed decisions.
 
 Our approach consists of:
-- **5-agent architecture**: Error Analyzer (with integrated SOP search), Data Collector, Decision Maker, Auto Executor, and Notification agents
+- **5-agent architecture**: Error Analyzer (with integrated SOP search), Data Collector, Decision Maker, Auto Executor, and Notification agent
 - **86-pattern RAG database**: Verified error-solution pairs from production verification workflows, enabling similarity-based SOP retrieval
 - **Domain-specific prompt engineering**: Detailed agent instructions encoding RTL verification expertise (our key contribution)
 - **RAG-based pattern matching**: Similarity search over 86 patterns using Qwen3 embeddings for accurate error-solution pairing
@@ -152,7 +152,7 @@ Our system employs five specialized agents orchestrated via LangChain/LangGraph:
 - **Role**: Pattern-specific information gathering
 - **Input**: Matched error pattern and SOP steps
 - **Process**:
-  - Execute pattern-specific collection routines (detailed in Section IV.C)
+  - Execute pattern-specific collection routines based on matched SOP
   - Query MongoDB for historical similar cases
   - Query OracleDB for specification data (port widths, signal names, TIE values)
   - Read log files, configuration files, HDL source (read-only operations)
@@ -202,7 +202,7 @@ Our system employs five specialized agents orchestrated via LangChain/LangGraph:
 
 1. **Error Detection**: Regression test failure triggers agent workflow
 2. **Analysis Phase**: Error Analyzer classifies error and retrieves SOP
-3. **Collection Phase**: Data Collector gathers category-specific information (parallel queries to MongoDB/OracleDB)
+3. **Collection Phase**: Data Collector gathers pattern-specific information (parallel queries to MongoDB/OracleDB)
 4. **Decision Phase**: Decision Maker synthesizes information and recommends action
 5. **Execution Phase** (conditional): Auto Executor runs low-risk actions with backups
 6. **Notification Phase**: Notification Agent sends structured report to engineer
@@ -211,38 +211,42 @@ Average workflow time: 2.65 minutes (vs. 47 minutes manual baseline)
 
 ---
 
+## IV. PROMPT ENGINEERING METHODOLOGY
 
-IV. PROMPT ENGINEERING METHODOLOGY
 Effective automation of RTL verification error triage requires prompts that encode domain expertise. We identified four critical design principles:
-A. Design Principles
-1) Domain Specificity: Generic instructions fail in RTL verification. Effective prompts must include:
 
-Specific error patterns per category (e.g., "option not found" for OPTERR)
-Common file locations (/project/config/, /var/log/sim/)
-Tool-specific terminology (HDL_REVISION, Perforce sync, spec Excel)
-Expected value formats (hex vs. decimal, MSB:LSB notation)
+### A. Design Principles
+
+1) **Domain Specificity**: Generic instructions fail in RTL verification. Effective prompts must include:
+
+- Specific error patterns per category (e.g., "option not found" for OPTERR)
+- Common file locations (/project/config/, /var/log/sim/)
+- Tool-specific terminology (HDL_REVISION, Perforce sync, spec Excel)
+- Expected value formats (hex vs. decimal, MSB:LSB notation)
 
 Example: Instead of "analyze the error", prompts specify "cat /project/config/sim.cfg and grep for SIMULATION_TIMEOUT option, then compare against template in /opt/templates/sim.cfg.template".
-2) Structured Output: Agents must produce parseable JSON for workflow orchestration:
 
-Required fields for downstream agents
-Explicit null handling (null vs. empty string)
-Nested structures for complex data (error_info, collected_data, decision_package)
+2) **Structured Output**: Agents must produce parseable JSON for workflow orchestration:
 
-3) Safety Constraints: Production environments require explicit boundaries:
+- Required fields for downstream agents
+- Explicit null handling (null vs. empty string)
+- Nested structures for complex data (error_info, collected_data, decision_package)
 
-Whitelist of allowed operations (read, grep, find)
-Blacklist of prohibited operations (rm, sed -i, database writes)
-Mandatory backup requirements before modifications
-Timeout enforcement (5 min per step, 15 min total)
+3) **Safety Constraints**: Production environments require explicit boundaries:
+
+- Whitelist of allowed operations (read, grep, find)
+- Blacklist of prohibited operations (rm, sed -i, database writes)
+- Mandatory backup requirements before modifications
+- Timeout enforcement (5 min per step, 15 min total)
 
 Whitelist alone is insufficient—agents may combine allowed commands unsafely. Explicit prohibition prevents unintended actions.
-4) Context Preservation: Each agent receives sufficient context for independent operation:
 
-5-10 lines around error location in logs
-File paths with line numbers
-Timestamps and environment state
-Previous agent outputs in workflow
+4) **Context Preservation**: Each agent receives sufficient context for independent operation:
+
+- 5-10 lines around error location in logs
+- File paths with line numbers
+- Timestamps and environment state
+- Previous agent outputs in workflow
 
 ## V. IMPLEMENTATION AND CASE STUDY VALIDATION
 
@@ -377,7 +381,7 @@ We acknowledge the following limitations in our validation:
 
 1. **Information gathering automation is viable**: 94.4% time reduction validates that systematic information collection can be automated effectively, even without RTL design knowledge.
 
-2. **Domain-specific prompts are critical**: Generic debugging prompts fail in RTL verification. Category-specific instructions with exact file paths, command examples, and terminology are essential.
+2. **Domain-specific prompts are critical**: Generic debugging prompts fail in RTL verification. Pattern-specific instructions with exact file paths, command examples, and terminology are essential.
 
 3. **RAG enables pattern matching**: 86-pattern database with Qwen3 embeddings achieves 0.7-0.9 similarity scores for known error types, enabling SOP retrieval without fine-tuning.
 
