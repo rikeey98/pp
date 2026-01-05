@@ -1,6 +1,6 @@
 # Multi-Agent System for Automated Error Triage in SoC RTL Verification: A Prompt Engineering Approach
 
-**Abstract**—RTL verification for modern SoC designs generates thousands of errors during regression testing, requiring significant engineer time for triage and information gathering. We present a multi-agent system that automates error information gathering for RTL verification workflows, reducing manual investigation time by 88.7% on average. Our system employs five specialized agents—Error Analyzer, Data Collector, Decision Maker, Auto Executor, and Notification—orchestrated via LangChain/LangGraph with domain-specific prompt engineering for 12 RTL verification error categories. We validate our approach with case studies from a flagship SoC project with 30,132 regression tests, demonstrating time reduction from 23.5 minutes to 2.65 minutes per error for information gathering tasks. The system leverages RAG-based SOP retrieval from an 86-pattern database and integrates with existing verification infrastructure via MCP. Conservative estimates suggest potential savings of 1,736 engineer-hours per regression cycle when deployed to 4,963 automatable errors in the common verification domain. Our key contribution is comprehensive domain-specific prompt engineering that encodes RTL verification expertise into agent instructions, enabling practical deployment in production verification environments.
+**Abstract**—RTL verification for modern SoC designs generates thousands of errors during regression testing, requiring significant engineer time for triage and information gathering. We present a multi-agent system that automates error information gathering for RTL verification workflows, reducing manual investigation time by 88.7% on average. Our system employs five specialized agents—Error Analyzer, Data Collector, Decision Maker, Auto Executor, and Notification—orchestrated via LangChain/LangGraph with domain-specific prompt engineering. We validate our approach with case studies from a flagship SoC project with 30,132 regression tests, demonstrating time reduction from 23.5 minutes to 2.65 minutes per error for information gathering tasks. The system leverages RAG-based SOP retrieval from an 86-pattern database that encodes verified error-solution pairs from production verification workflows, integrating with existing infrastructure via MCP. Conservative estimates suggest potential savings of 1,736 engineer-hours per regression cycle when deployed to 4,963 automatable errors in the common verification domain. Our key contribution is comprehensive domain-specific prompt engineering that encodes RTL verification expertise into agent instructions, enabling practical deployment in production verification environments.
 
 **Index Terms**—RTL verification, multi-agent systems, prompt engineering, error triage, LangChain, RAG
 
@@ -34,9 +34,9 @@ We present a multi-agent system focused on **information gathering automation** 
 
 Our approach consists of:
 - **5-agent architecture**: Error Analyzer (with integrated SOP search), Data Collector, Decision Maker, Auto Executor, and Notification agents
-- **12-category error taxonomy**: Covering environment/configuration errors (OPTERR, PATHERR, SPECERR-NOFILE) through design errors (TYPEERR, SPECERR-*) to tool/file errors (FILEERR)
+- **86-pattern RAG database**: Verified error-solution pairs from production verification workflows, enabling similarity-based SOP retrieval
 - **Domain-specific prompt engineering**: Detailed agent instructions encoding RTL verification expertise (our key contribution)
-- **RAG-based SOP retrieval**: Similarity search over 86 verified error-solution patterns using Qwen3 embeddings
+- **RAG-based pattern matching**: Similarity search over 86 patterns using Qwen3 embeddings for accurate error-solution pairing
 - **MCP integration**: MongoDB for historical cases, OracleDB for specification data, file system access for logs and HDL files
 
 ### D. Contributions
@@ -45,9 +45,9 @@ This paper makes four primary contributions:
 
 1) **Multi-agent architecture for error triage**: A 5-agent system design specifically tailored for RTL verification workflows, with clear separation between information gathering (automated) and decision-making (human).
 
-2) **Domain-specific prompt engineering** ⭐: Comprehensive system prompts (>2,500 lines) that encode RTL verification expertise into agent instructions for 12 error categories. This is our primary contribution and the focus of Section IV.
+2) **Domain-specific prompt engineering** ⭐: Comprehensive system prompts (>2,500 lines) that encode RTL verification expertise into agent instructions, enabling accurate error analysis and information collection. This is our primary contribution and the focus of Section IV.
 
-3) **12-category error taxonomy**: A systematic classification of RTL verification errors based on automation potential and information requirements, derived from analysis of 30,132 regression tests.
+3) **86-pattern RAG-based SOP retrieval**: A curated database of verified error-solution pairs from production verification workflows (30,132 regression tests), enabling similarity-based pattern matching using Qwen3 embeddings. This approach allows the system to learn from historical resolutions without requiring manual categorization.
 
 4) **Real-world validation and scalability analysis**: Case studies from flagship SoC project demonstrating 88.7% time reduction for information gathering, with conservative estimates of 1,736 hours savings per cycle for 4,963 automatable errors.
 
@@ -75,13 +75,13 @@ Section II reviews related work in automated debugging and LLM-based agent syste
 
 **HDLdebugger** [5] presents a RAG-based approach for general HDL debugging assistance. Their system provides conversational debugging support using embedded HDL documentation. Our work differs in: (1) targeting specific verification workflow errors rather than general debugging, (2) multi-agent orchestration with specialized roles, and (3) integration with production verification infrastructure (databases, file systems).
 
-**AssertSolver** [6] addresses assertion failures in RTL verification using LLMs to suggest fixes. Their focus on assertion-specific debugging complements our broader error triage approach. We handle 12 error categories beyond assertions, with emphasis on systematic information gathering.
+**AssertSolver** [6] addresses assertion failures in RTL verification using LLMs to suggest fixes. Their focus on assertion-specific debugging complements our broader error triage approach. We handle diverse error patterns (86 verified patterns) beyond assertions, with emphasis on systematic information gathering.
 
 ### D. Multi-Agent Systems for Programming
 
 **ChatDev** [7] demonstrates multi-agent collaboration for software development using role-based agents (CEO, CTO, programmer, etc.). We adopt their agent specialization concept but apply it to verification workflows rather than development. Our agents (Error Analyzer, Data Collector) have domain-specific roles aligned with verification engineering tasks.
 
-**MetaGPT** [8] proposes standardized operating procedures (SOPs) for agent collaboration. This directly influenced our approach—we encode verification SOPs into agent prompts as structured instructions. However, we extend this with category-specific prompts for 12 error types.
+**MetaGPT** [8] proposes standardized operating procedures (SOPs) for agent collaboration. This directly influenced our approach—we encode verification SOPs into agent prompts as structured instructions. However, we extend this with pattern-specific prompts for 86 error-solution pairs from production workflows.
 
 ### E. Differentiation from Prior Work
 
@@ -108,49 +108,51 @@ Our system architecture follows a fundamental principle: **automate information 
 
 Steps 1-3 are systematic and automatable. Step 4 requires RTL design knowledge and cannot be safely automated. Our architecture reflects this boundary.
 
-### B. 12-Category Error Taxonomy
+### B. 86-Pattern RAG Database
 
-We classify verification errors into 12 categories based on analysis of 30,132 regression tests from a flagship SoC project. Our taxonomy consolidates 86 defined common domain solutions into 12 categories through systematic grouping. This consolidation serves three critical purposes: (1) **Agent prompt engineering efficiency**—creating specialized prompts for 12 categories is tractable while 86 would be unwieldy, (2) **Pattern generalization**—grouping similar error patterns (e.g., various port-related issues into SPECERR-NULLPORT) enables agents to handle pattern variations within categories, and (3) **Maintainability**—category-level abstraction allows prompt updates without restructuring the entire taxonomy when new error patterns emerge. The 12 categories represent the optimal granularity for multi-agent orchestration, balancing specificity for accurate classification with generality for robust automation.
+Our system's knowledge base consists of 86 verified error-solution patterns extracted from production verification workflows. These patterns were curated through systematic analysis of 30,132 regression tests from a flagship SoC project, focusing on the common verification domain (6,617 tests, 22% of total) where approximately 75% of errors are automatable (4,963 cases).
 
-**Environment/Configuration Errors (3 categories - 22% of automatable):**
-- **OPTERR**: Option/value setting errors in configuration files (missing options, type mismatches)
-- **PATHERR**: Path/filename version mismatches, typically from Perforce sync issues
-- **SPECERR-NOFILE**: Specification or HDL files missing at expected paths
+**Pattern Database Construction:**
+Each pattern in the database contains:
+- **Error signature**: Keywords, log patterns, and contextual indicators that identify the error type
+- **Solution steps**: Verified procedures for information gathering and resolution
+- **Historical context**: Success rates, similar cases, and resolution statistics
+- **Data requirements**: Specific files, database queries, and system state needed for triage
 
-**Design Errors (7 categories - 58% of automatable):**
-- **TYPEERR**: Signal/port type definition errors, undefined module names
-- **SPECERR_DSTERR**: Multiple drivers to single signal, conflicting assignments
-- **SPECERR-NULLPORT**: Port name missing or null in connections
-- **SPECERR-NULLTXT**: Empty specification fields, incomplete port descriptions
-- **SPECERR-PORTWIDTH**: Bit-width mismatches between specification and HDL
-- **SPECERR_TIEERR**: TIE value conflicts for tied signals
-- **SPECERR-HIER7**: Hierarchical level constraint violations (depth limits)
+**Error Pattern Coverage:**
+The 86 patterns span the spectrum of RTL verification errors:
+- **Environment/Configuration errors** (~22%): Configuration file issues, path mismatches, missing files
+- **Design errors** (~58%): Type mismatches, signal conflicts, port errors, specification violations, hierarchical constraints
+- **Tool/File errors** (~20%): Auto-generated file failures, specification-HDL mismatches, parsing errors
 
-**Tool/File Errors (2 categories - 20% of automatable):**
-- **SPECERR-DIFFVAL**: Specification value mismatches between Excel and HDL
-- **FILEERR**: Auto-generated file errors, parsing failures
+**RAG-Based Retrieval:**
+Rather than requiring manual error categorization, our Error Analyzer agent uses similarity-based retrieval with Qwen3 embeddings to match incoming errors against the 86-pattern database. This approach enables the system to:
+1. Handle pattern variations without rigid classification rules
+2. Learn from successful historical resolutions
+3. Adapt to new error types through pattern similarity
+4. Provide confidence scores (similarity ≥0.7 threshold) for matched solutions
 
-This taxonomy emerged from analyzing common domain regression tests (6,617 tests, 22% of total), where approximately 75% fell into these 12 automatable categories (4,963 cases).
+This pattern-based approach eliminates the need for explicit categorization while maintaining high accuracy through curated, verified error-solution pairs.
 
 ### C. Five-Agent Architecture
 
 Our system employs five specialized agents orchestrated via LangChain/LangGraph:
 
 **1) Error Analyzer Agent**
-- **Role**: Error classification + SOP retrieval (integrated from separate SOP Searcher)
+- **Role**: Error pattern matching + SOP retrieval (integrated from separate SOP Searcher)
 - **Input**: Raw error logs from regression tests
 - **Process**:
-  - Classify error into one of 12 categories using keyword matching and context analysis
   - Generate embedding of error context using Qwen3
-  - Retrieve top-3 similar patterns from 86-pattern database (RAG)
+  - Retrieve top-3 similar patterns from 86-pattern database via similarity search (RAG)
+  - Match error against verified solution patterns
   - Extract solution steps from matched SOPs
-- **Output**: JSON with error classification, matched SOP (if similarity ≥0.7), and solution steps
+- **Output**: JSON with matched pattern, SOP (if similarity ≥0.7), confidence score, and solution steps
 
 **2) Data Collector Agent**
-- **Role**: Category-specific information gathering
-- **Input**: Error classification and SOP steps
+- **Role**: Pattern-specific information gathering
+- **Input**: Matched error pattern and SOP steps
 - **Process**:
-  - Execute category-specific collection routines (detailed in Section IV.C)
+  - Execute pattern-specific collection routines (detailed in Section IV.C)
   - Query MongoDB for historical similar cases
   - Query OracleDB for specification data (port widths, signal names, TIE values)
   - Read log files, configuration files, HDL source (read-only operations)
@@ -249,10 +251,10 @@ Previous agent outputs in workflow
 **Dataset**: Flagship SoC project regression tests
 - Total regression tests: 30,132
 - Common domain tests: 6,617 (22% - targeted for broad applicability)
-- Agent-automatable (12 categories): ~4,963 (75% of common domain)
+- Agent-automatable (86-pattern coverage): ~4,963 (75% of common domain)
 - **Validated cases**: 1-2 representative cases (preliminary validation)
 
-**Rationale for targeting common domain**: Errors in the common verification domain affect multiple IP blocks and design teams, providing maximum organizational impact. Full deployment to all 30,132 tests would require category expansion beyond current 12.
+**Rationale for targeting common domain**: Errors in the common verification domain affect multiple IP blocks and design teams, providing maximum organizational impact. Full deployment to all 30,132 tests would require pattern database expansion beyond current 86 patterns.
 
 **Technology Stack**:
 - LangChain 0.1.0, LangGraph 0.0.20
@@ -263,7 +265,7 @@ Previous agent outputs in workflow
 - Custom MCP servers for infrastructure access
 
 **Validation Methodology**:
-- Selected representative cases from 12 categories
+- Selected representative cases from 86-pattern database
 - Measured manual baseline through engineer interviews (averaged)
 - Measured agent system time with detailed breakdown
 - Assessed information completeness with checklist
@@ -415,7 +417,7 @@ We acknowledge the following limitations in our validation:
 
 1. **Small validation scale**: 1-2 case preliminary validation; large-scale deployment needed to confirm effectiveness across 4,963 cases
 
-2. **Partial coverage**: 12 categories cover ~75% of common domain (25% remain uncategorized)
+2. **Partial coverage**: 86 patterns cover ~75% of common domain (25% remain unmatched or require pattern expansion)
 
 3. **Manual solution curation**: 86 error-solution patterns require manual definition and maintenance by domain experts
 
@@ -447,9 +449,9 @@ We acknowledge the following limitations in our validation:
 
 ## VII. CONCLUSION
 
-We presented a multi-agent system for automating information gathering in RTL verification error triage, addressing a critical bottleneck in modern SoC verification workflows. Our system employs five specialized agents with domain-specific prompt engineering for 12 error categories, achieving 88.7% time reduction in information gathering tasks (23.5 min → 2.65 min) based on case studies from a flagship SoC project with 30,132 regression tests.
+We presented a multi-agent system for automating information gathering in RTL verification error triage, addressing a critical bottleneck in modern SoC verification workflows. Our system employs five specialized agents with domain-specific prompt engineering and an 86-pattern RAG database, achieving 88.7% time reduction in information gathering tasks (23.5 min → 2.65 min) based on case studies from a flagship SoC project with 30,132 regression tests.
 
-Our key contribution is comprehensive prompt engineering that encodes RTL verification expertise into agent instructions, enabling practical deployment in production environments. The 2,500+ lines of domain-specific prompts include category-specific error patterns, data collection procedures, risk assessment frameworks, and safety constraints.
+Our key contribution is comprehensive prompt engineering that encodes RTL verification expertise into agent instructions, enabling practical deployment in production environments. The 2,500+ lines of domain-specific prompts include pattern-specific error signatures, data collection procedures, risk assessment frameworks, and safety constraints.
 
 ### A. System Capability Assessment
 
