@@ -394,42 +394,26 @@ We acknowledge the following limitations in our validation:
 ### B. Practical Deployment Considerations
 
 **Organizational Impact:**
-- 3,668 hours/cycle savings for 4,963 common domain errors
-- Reduces overnight error backlog from days to hours
-- Frees senior engineers from repetitive information gathering
-- Captures tribal knowledge in 86-pattern database
+
+The deployment of our system is expected to have significant impact on verification organizations. Conservative estimates project savings of 3,668 engineer-hours per regression cycle for 4,963 automatable errors in the common domain. This dramatically reduces error backlog processing time from days to hours following overnight regression tests. More importantly, senior verification engineers are freed from repetitive information gathering tasks to focus on high-value activities such as analyzing complex design issues. Additionally, the 86-pattern database has the side benefit of explicitly documenting tacit knowledge (tribal knowledge) from experienced engineers, accumulating it as organizational knowledge assets.
 
 **Deployment Challenges:**
-1. **Pattern database construction**: Building initial 86-pattern database required domain expert review of historical cases
-2. **System prompt maintenance**: Prompts need updates when verification tools or processes change
-3. **Engineer trust-building**: Initial deployment requires demonstrating reliability before engineers rely on automation
-4. **Infrastructure integration**: MCP server setup, database access, verification server permissions
-5. **Change management**: Training engineers on new workflow (review agent recommendations vs. manual investigation)
 
-**Success Criteria for Production Deployment:**
-- Information completeness ≥80% maintained
-- Time reduction ≥85% sustained
-- Auto-execution accuracy ≥95% (no incorrect modifications)
-- Engineer adoption rate ≥70% (engineers using system vs. manual)
-- Pattern database coverage ≥80% of common errors
+However, deploying to production environments requires addressing several practical challenges. First, constructing the initial 86-pattern database requires significant time investment from domain experts to systematically review and validate historical cases. Second, there is ongoing maintenance burden to continuously update system prompts whenever verification tools or processes change. Third, building engineer trust in the automation system is crucial, which requires demonstrating sufficient reliability and accuracy during initial deployment phases. Fourth, technical infrastructure integration work is needed including MCP server configuration, database access permissions, and verification server connections. Finally, engineer training and change management are essential for transitioning from traditional manual investigation workflows to the new workflow of reviewing agent recommendations.
+
+**Success Metrics for Production Deployment:**
+
+We established the following measurable target metrics to evaluate deployment success. Information completeness collected by agents must maintain 80% or above so engineers can make decisions without additional information gathering. Time reduction compared to manual processes must consistently achieve 85% or above to demonstrate substantial efficiency improvements. Auto-execution accuracy must maintain 95% or above to minimize side effects from incorrect modifications. Engineer adoption rate must reach 70% or above to confirm organizational acceptance. Additionally, pattern database coverage must exceed 80% of common domain errors to provide automated support for most error types.
 
 ### C. Limitations and Future Work
 
 **Current Limitations:**
 
-1. **Small validation scale**: 1-2 case preliminary validation; large-scale deployment needed to confirm effectiveness across 4,963 cases
+This research has several clear limitations. The most significant limitation is that we conducted preliminary validation with only 1-2 representative cases. Large-scale production deployment and comprehensive performance evaluation are essential to confirm system effectiveness across all 4,963 automatable cases. Second, the current 86 patterns cover only approximately 75% of common domain errors, leaving 25% unmatched or requiring new pattern definitions. Third, the pattern database is static and cannot automatically learn from new error cases or engineer feedback, relying instead on manual updates. This may increase system maintenance burden over time.
 
-2. **Partial coverage**: 86 patterns cover ~75% of common domain (25% remain unmatched or require pattern expansion)
+**Future Research Directions:**
 
-3. **Static pattern database**: Patterns require manual updates; no dynamic learning from new cases or engineer feedback
-
-**Future Work:**
-
-1. **3-month pilot deployment**: Full deployment to 4,963 common domain cases with comprehensive metrics collection
-
-2. **Dynamic pattern learning**: Learn new patterns from engineer feedback and successful resolutions, reducing manual curation effort
-
-3. **Cross-project generalization**: Validate approach on multiple SoC projects to establish generalizability
+To overcome these limitations and advance the system, we plan three directions of follow-up research. In the short term, we will conduct a pilot deployment applying the system to all 4,963 common domain cases and systematically collect comprehensive metrics including information completeness, time reduction rates, and engineer satisfaction. In the medium term, we aim to develop dynamic pattern learning mechanisms that automatically learn new patterns from engineer feedback and successfully resolved cases, reducing manual curation effort. In the long term, we aim to expand validation results currently limited to one flagship SoC project to various SoC projects, design methodologies, and organizational environments to establish the generalizability of our approach.
 
 ---
 
