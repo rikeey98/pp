@@ -110,7 +110,7 @@ Steps 1-3 are systematic and automatable. Step 4 requires RTL design knowledge a
 
 ### B. 86-Pattern RAG Database
 
-Our system's knowledge base consists of 86 verified error-solution patterns extracted from production verification workflows. These patterns were curated through systematic analysis of 30,132 regression tests from a flagship SoC project, focusing on the common verification domain (6,617 tests, 22% of total) where approximately 75% of errors are automatable (4,963 cases).
+Our system's knowledge base consists of 86 verified error-solution patterns curated from 4,963 automatable cases within the common verification domain (6,617 tests, 22% of total) of a flagship SoC project with 30,132 regression tests.
 
 **Pattern Database Construction:**
 Each pattern in the database contains:
@@ -139,7 +139,7 @@ This pattern-based approach eliminates the need for explicit categorization whil
 Our system employs five specialized agents orchestrated via LangChain/LangGraph:
 
 **1) Error Analyzer Agent**
-- **Role**: Error pattern matching + SOP retrieval (integrated from separate SOP Searcher)
+- **Role**: Error pattern matching + SOP retrieval
 - **Input**: Raw error logs from regression tests
 - **Process**:
   - Generate embedding of error context using Qwen3
@@ -318,12 +318,6 @@ We acknowledge the following limitations in our validation:
 **4) No production deployment**: System tested in development environment, not live production. Production deployment may reveal integration challenges, performance issues, or edge cases.
 
 **5) Information completeness subjectivity**: 83.3% completeness based on checklist assessment, which may not capture all edge cases or engineer preferences.
-
-**Mitigation Strategy**:
-- Conservative scalability estimates (75%, not 100%)
-- Honest reporting of preliminary validation status
-- Clear distinction between validated results (1-2 cases) and expected results (4,963 cases)
-- Planned 3-month pilot deployment for comprehensive evaluation
 
 ---
 
