@@ -45,7 +45,7 @@ This paper makes four primary contributions:
 
 1) **Multi-agent architecture for error triage**: A 5-agent system design specifically tailored for RTL verification workflows, with clear separation between information gathering (automated) and decision-making (human).
 
-2) **Domain-specific prompt engineering** ⭐: Comprehensive system prompts (>2,500 lines) that encode RTL verification expertise into agent instructions, enabling accurate error analysis and information collection. This is our primary contribution and the focus of Section IV.
+2) **Domain-specific prompt engineering**: Comprehensive system prompts (>2,500 lines) that encode RTL verification expertise into agent instructions, enabling accurate error analysis and information collection. This is our primary contribution and the focus of Section IV.
 
 3) **86-pattern RAG-based SOP retrieval**: A curated database of verified error-solution pairs from production verification workflows (30,132 regression tests), enabling similarity-based pattern matching using Qwen3 embeddings. This approach allows the system to learn from historical resolutions without requiring manual categorization.
 
@@ -257,12 +257,11 @@ Previous agent outputs in workflow
 **Rationale for targeting common domain**: Errors in the common verification domain affect multiple IP blocks and design teams, providing maximum organizational impact. Full deployment to all 30,132 tests would require pattern database expansion beyond current 86 patterns.
 
 **Technology Stack**:
-- LangChain 0.1.0, LangGraph 0.0.20
-- Claude Sonnet 3.5 (claude-3-5-sonnet-20241022)
-- Qwen3 embeddings for RAG
-- MongoDB 6.0 (86-pattern database)
-- OracleDB 19c (specification data)
-- Custom MCP servers for infrastructure access
+- **Agent Orchestration**: LangChain 0.1.0, LangGraph 0.0.20 for agent workflow management
+- **LLM**: OpenAI-GPT-OSS-120B for agent reasoning (also tested with Claude Sonnet 3.5: claude-3-5-sonnet-20241022)
+- **RAG**: Qwen3 embeddings for error pattern similarity search
+- **Databases**: SQL (OracleDB 19c for specification data), NoSQL (MongoDB 6.0 for 86-pattern database)
+- **MCP (Model Context Protocol)**: Custom servers for MongoDB access, OracleDB queries, file system operations on verification servers
 
 **Validation Methodology**:
 - Selected representative cases from 86-pattern database
